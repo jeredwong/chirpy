@@ -1,8 +1,8 @@
 package main
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 )
 
 func main() {
@@ -15,7 +15,15 @@ func main() {
 		Handler:        mux,
 	}
 
-	mux.Handle("/", http.FileServer(http.Dir("")))
+	// root path
+	mux.Handle("/app/", http.StripPrefix("/app", http.FileServer(http.Dir(""))))
+
+	// healthz path 
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
 
 	log.Println("listening on port 8080...")
 	log.Fatal(server.ListenAndServe())
